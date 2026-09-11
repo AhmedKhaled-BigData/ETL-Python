@@ -1,0 +1,17 @@
+[2026-09-11 14:40:57] Jupyter Notebook Environment Initialized.
+[2026-09-11 17:23:56] Starting Full Data Engineering Pipeline...
+[2026-09-11 17:23:56] === STAGE 1: EXTRACTION ===
+[2026-09-11 17:23:57] Data extracted successfully. Shape: 187531 rows, 21 columns.
+[2026-09-11 17:23:57] === STAGE 2: TRANSFORMATION & CLEANING (INR STANDARDIZATION) ===
+[2026-09-11 17:23:58] Removed 0 duplicate rows.
+[2026-09-11 17:23:59] Merging Carpet Area & Super Area into 'Area_sqft'...
+[2026-09-11 17:23:59] Standardizing categorical fields...
+[2026-09-11 17:24:00] Dropping empty columns: ['Dimensions', 'Plot Area']
+[2026-09-11 17:24:00] Flagged 17,920 invalid records; preserved 9,684 Call for Price records.
+[2026-09-11 17:24:00] === STAGE 3: ANALYSIS & SUMMARY CREATION ===
+[2026-09-11 17:24:00] Summary aggregation table generated successfully.
+[2026-09-11 17:24:00] === STAGE 4: LOADING ===
+[2026-09-11 17:24:02] Saved clean dataset to: data/output/cleaned_house_prices.csv
+[2026-09-11 17:24:02] Saved summary dataset to: data/output/summary_house_prices.csv
+[2026-09-11 17:24:03] Saved cleaned tables into SQLite DB successfully.
+[2026-09-11 17:24:03] ETL Pipeline Finished Successfully!
