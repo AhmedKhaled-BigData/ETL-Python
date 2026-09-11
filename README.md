@@ -1,118 +1,252 @@
-Markdown
-# Real Estate Data Engineering Pipeline (ETL & Analysis)
+# Real Estate House Price ETL Pipeline
+
+An end-to-end Python data engineering project for extracting, cleaning, analyzing, and loading Indian real estate listing data.
 
 **Course:** Big Data Engineering with Python  
-**Project Title:** House Price ETL & Descriptive Analysis  
-**Team Members:** Marco Hany & Ahmed Khaled  
+**Project:** House Price ETL and Descriptive Analysis  
+**Team:** Marco Hany and Ahmed Khaled
+## Project Overview
 
----
+The pipeline processes a large property dataset with approximately 187,000 records. It converts inconsistent price and area values into analysis-ready fields, preserves unavailable prices as `Call for Price`, flags invalid records, and produces reusable CSV and SQLite outputs.
 
-## 1. Project Overview & Objective
-This project implements an end-to-end, reproducible Data Engineering pipeline (ETL) built using Python and `pandas`. The primary objective is to clean, standardize, transform, and analyze a real-estate dataset containing **187,531 raw property records**, and then load the clean data into structured CSV files and an SQLite database.
+The project focuses on classical ETL and descriptive analysis. It does not use machine learning, Spark, or Hadoop.
+## Pipeline Stages
 
-> **Scope Note:** Per course guidelines, no machine learning models or advanced big-data platforms (e.g., Spark/Hadoop) are included. The focus remains strictly on robust Data Engineering processes (Extract, Transform, Analyze, Load, and Logging).
+### 1. Extract
 
----
+`extract()` reads `data/raw/house_prices.csv` with pandas and logs the input shape and any file errors.
 
-## 2. Directory & Folder Structure
+### 2. Transform
+
+`transform()` performs the following operations:
+
+- Removes exact duplicate rows.
+- Standardizes `Amount(in rupees)` and `Price (in rupees)`.
+- Converts values such as `42 Lac` and `1.6 Cr` into numeric INR values.
+- Preserves unavailable prices as `Call for Price`.
+- Combines `Carpet Area` and `Super Area` into `Area_sqft`.
+- Derives a missing amount or unit price when the required values are available.
+- Standardizes categorical fields and fills missing categories with explicit defaults.
+- Adds `is_invalid` and `price_status` quality indicators.
+
+Temporary numeric values are used for calculations but are not added to the final cleaned-data schema.
+### 3. Analyze
+
+`analyze()` filters invalid records and creates a location-level summary containing:
+
+- Property count.
+- Total and average property value.
+- Median property price.
+- Average area.
+- Median price per square foot.
+
+The notebook also includes additional descriptive questions covering locations, furnishing, bathrooms, missing values, categories, duplicates, and invalid records.
+### 4. Load
+
+`load()` writes the results to:
+
+- `data/output/cleaned_house_prices.csv`
+- `data/output/summary_house_prices.csv`
+- `data/output/house_prices.db`
+
+The SQLite database contains `cleaned_house_prices` and `summary_house_prices` tables.
+### 5. Logging
+
+The `log()` function records timestamps, pipeline milestones, row counts, quality statistics, and errors in `logfile.txt`.
+
+## Project Structure
+
 ```text
-project/
+project_python/
 ├── data/
 │   ├── raw/
-│   │   └── house_prices.csv        # Raw dataset
+│   │   └── house_prices.csv
 │   └── output/
-│       ├── cleaned_house_prices.csv    # Cleaned dataset
-│       ├── summary_house_prices.csv    # Aggregated summary table
-│       └── house_prices.db             # SQLite database output
-├── project.ipynb                        # Complete runnable Jupyter Notebook pipeline
-├── logfile.txt                          # Timestamped ETL execution log
-└── README.md                            # Project documentation and report
+│       ├── cleaned_house_prices.csv
+│       ├── summary_house_prices.csv
+│       └── house_prices.db
+├── project.ipynb
+├── logfile.txt
+├── .gitattributes
+├── .gitignore
+└── README.md
 ```
 
-## 3. Dataset Description
+## Requirements
 
-The source dataset contains real estate property details across various cities in India with 21 initial columns:
+- Python 3.9 or newer
+- pandas
+- NumPy
+- Jupyter Notebook or VS Code with the Jupyter extension
 
-Identifier: Index, Title, Society
+Install the Python dependencies with:
 
-Monetary Fields: Amount(in rupees), Price (in rupees)
+```bash
+pip install pandas numpy jupyter
+```
 
-Physical Characteristics: Carpet Area, Super Area, Dimensions, Plot Area, Floor, Bathroom, Balcony, Car Parking
+## Running the Project
 
-Categorical & Descriptive: location, Status, Transaction, Furnishing, facing, overlooking, Ownership, Description
+1. Clone the repository.
+2. Open `project.ipynb` in Jupyter or VS Code.
+3. Run the notebook cells in order.
+4. Confirm the generated datasets in `data/output/` and execution details in `logfile.txt`.
 
-## 4. ETL Architecture & Pipeline Design
+The notebook expects the raw input file at:
 
-### A. Extract (extract())
+```text
+data/raw/house_prices.csv
+```
 
-Ingests the raw CSV dataset from data/raw/187k_house_prices.csv.
+## Validation Checks
 
-Validates initial row and column counts using try/except blocks to handle file I/O errors.
+The notebook validates that:
 
-### B. Transform (transform())
+- Temporary price columns are not present in the final schema.
+- Price columns do not contain unresolved null values.
+- `is_invalid` contains Boolean values.
+- A known reference amount is transformed correctly.
+- `Call for Price` records are preserved.
 
-Duplicate Handling: Detects and removes exact duplicate property rows.
+## Large Files and Git LFS
 
-Monetary Standardization:
+The raw CSV, cleaned CSV, and SQLite database exceed GitHub's regular file-size limit. They are tracked with [Git LFS](https://git-lfs.com/).
 
-Parses text-based amount expressions (e.g., 42 Lac →4,200,000 , 1.6 Cr →16,000,000).
-Standardizes raw prices by stripping currency symbols and commas.
-Handles unlisted/hidden prices (Call for Price, Price on Request) by converting them to NaN.
-Performs cross-column missing value imputation: fills missing Price values using cleaned Amount values where available.
+Install Git LFS before cloning or pulling the full data files:
 
-Area Standardization:
+```bash
+git lfs install
+git lfs pull
+```
 
-Cleans Carpet Area and Super Area by extracting numerical values and stripping unit labels (sqft).
-Creates a unified area measure (final_area_sqft) using Carpet Area as the primary choice and Super Area as a fallback.
+## Contributors
 
-Feature Engineering:
+- Marco Hany
+- Ahmed Khaled
+Markdown
+# Real Estate House Prices: ETL and Descriptive Analysis
 
-Computes price_per_carpet_area (Price/Carpet Area) to establish a price-per-unit metric for location comparison.
+An end-to-end data engineering project for cleaning, validating, analyzing, and storing Indian real-estate listings. The pipeline is implemented in Python and pandas and is delivered as a reproducible Jupyter Notebook.
 
-Categorical Standardization:
+**Course:** Big Data Engineering with Python  
+**Project:** House Price ETL and Descriptive Analysis  
+**Team:** Marco Hany and Ahmed Khaled
 
-Cleans categorical fields (location, Status, Transaction, Furnishing, facing, Ownership) using title-case formatting and stripping extra spaces.
+## Project Objectives
 
-Data Quality & Flagging Rule:
+- Extract property listings from the raw CSV dataset.
+- Standardize prices, areas, and categorical values.
+- Derive missing amount or unit-price values when reliable inputs exist.
+- Flag invalid records without silently deleting them.
+- Produce location-level summary metrics.
+- Persist clean data and summaries as CSV files and SQLite tables.
 
-Identifies records with non-positive price or area values (≤0) and flags them with an is_invalid = True indicator.
-No Silent Deletion: Invalid records are flagged rather than silently deleted to preserve auditability and overall row metrics.
+The project focuses on practical ETL and data-quality workflows. It does not use machine-learning models, Spark, or Hadoop.
 
-### C. Analyze (analyze())
+## Repository Structure
 
-Evaluates the clean dataset (is_invalid == False) to answer business questions:
+```text
+project_python/
+|-- data/
+|   |-- raw/
+|   |   `-- house_prices.csv
+|   `-- output/
+|       |-- cleaned_house_prices.csv
+|       |-- summary_house_prices.csv
+|       `-- house_prices.db
+|-- project.ipynb
+|-- logfile.txt
+|-- .gitattributes
+|-- .gitignore
+`-- README.md
+```
 
-Top Locations by Price: Aggregates average and median property prices per location.
-Price Per Area Metric: Identifies locations with the highest median price per square foot.
-Categorical Distribution: Analyzes common property statuses and furnishing types.
-Data Quality Audit: Measures total missing values in key fields before and after cleaning.
+## Pipeline Design
 
-### D. Load (load())
+### 1. Extract
 
-Exports the clean dataset to data/output/cleaned_house_prices.csv.
-Exports the location-aggregated summary metrics to data/output/summary_house_prices.csv.
-Writes both tables into an SQLite database (data/output/house_prices.db).
+`extract()` loads `data/raw/house_prices.csv` with pandas and logs the input shape. File errors are logged and re-raised so failures remain visible.
 
-### E. Logging (log())
+### 2. Transform
 
-Tracks execution timestamps, milestone step completions, data shape metrics, and potential runtime exceptions into logfile.txt.
+`transform()` performs the main cleaning workflow:
 
-## 5. Summary of Analysis Results
+- Removes exact duplicate rows.
+- Converts price expressions such as `42 Lac` and `1.6 Cr` to INR values.
+- Preserves unavailable prices as `Call for Price`.
+- Extracts numeric values from `Carpet Area` and `Super Area` into `Area_sqft`.
+- Uses area and unit price to derive a missing amount when possible.
+- Uses amount and area to derive a missing unit price when possible.
+- Standardizes categorical fields and fills missing categories with explicit labels.
+- Adds `is_invalid` and `price_status` quality indicators.
 
-Missing Value Resolution: High missingness in Price (in rupees) was significantly reduced by imputing values from Amount(in rupees).
+Temporary numeric price Series are used for calculations but are not added to the final output schema.
 
-Area Metrics: Carpet area was successfully isolated into numeric floats, enabling meaningful price-per-sqft evaluations across locations.
+### 3. Analyze
 
-Data Quality: Outlier and impossible prices (≤0) were successfully tagged without dropping essential metadata.
+`analyze()` excludes records flagged as invalid and creates a location-level summary containing:
 
-## 6. How to Run the Pipeline
+- Total properties.
+- Total property value in INR.
+- Average and median property price.
+- Average area in square feet.
+- Median price per square foot.
 
-Ensure Python 3.x is installed with required packages:
+The notebook also includes descriptive questions covering location prices, furnishing, bathrooms, missing critical values, category distributions, and data quality.
 
-Bash
-pip install pandas numpy
-Place the raw CSV dataset in data/raw/house_prices.csv.
+### 4. Load
 
-Open and run all cells sequentially in project.ipynb.
+`load()` writes the results to:
 
-Outputs will be generated automatically in data/output/ alongside the execution log in logfile.txt.
+- `data/output/cleaned_house_prices.csv`
+- `data/output/summary_house_prices.csv`
+- `data/output/house_prices.db`
+
+The SQLite database contains `cleaned_house_prices` and `summary_house_prices` tables.
+
+### 5. Logging and Validation
+
+The `log()` function records timestamps, pipeline stages, row counts, errors, and output events in `logfile.txt`. The validation section checks that:
+
+- Temporary price columns are absent.
+- Required price columns contain no missing values after transformation.
+- `is_invalid` is Boolean.
+- A known reference amount is transformed correctly.
+- `Call for Price` records are preserved.
+
+## Installation and Execution
+
+### Requirements
+
+- Python 3.9 or later
+- Jupyter Notebook or JupyterLab
+- pandas
+- NumPy
+
+Install the Python dependencies with:
+
+```bash
+python -m pip install pandas numpy jupyter
+```
+
+### Run the Notebook
+
+1. Clone the repository.
+2. Ensure the raw dataset is available at `data/raw/house_prices.csv`.
+3. Open `project.ipynb` in VS Code or Jupyter.
+4. Run the cells from top to bottom.
+
+The cleaned files and execution log will be regenerated in their respective output locations.
+
+## Large Files
+
+The raw and generated datasets are tracked with Git LFS because they exceed GitHub's standard file-size limit. Install Git LFS before cloning or pushing:
+
+```bash
+git lfs install
+git lfs pull
+```
+
+## Data Quality Policy
+
+Invalid records are flagged rather than silently removed. A record is considered invalid when its amount or area is missing, zero, or negative after transformation. This preserves auditability while allowing the analysis stage to work with valid records only.
